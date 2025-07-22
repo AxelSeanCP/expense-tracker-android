@@ -9,28 +9,41 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import android.content.Context
+import android.content.ContextWrapper
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
+    onPrimary = Color.Black,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    onSecondary = Color.Black,
+    tertiary = Pink80,
+    onTertiary = Color.Black,
+    background = DarkBackground,
+    onBackground = LightBackground,
+    surface = DarkBackground,
+    onSurface = LightBackground,
+    error = ErrorRed,
+    onError = OnErrorWhite
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
     onPrimary = Color.White,
+    secondary = PurpleGrey40,
     onSecondary = Color.White,
+    tertiary = Pink40,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = LightBackground,
+    onBackground = DarkBackground,
+    surface = LightBackground,
+    onSurface = DarkBackground,
+    error = ErrorRed,
+    onError = OnErrorWhite
 )
 
 @Composable
@@ -50,9 +63,26 @@ fun ExpenseTrackerTheme(
         else -> LightColorScheme
     }
 
+    val view = LocalContext.current.findActivity()?.window?.decorView
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = !darkTheme
+
+    LaunchedEffect(systemUiController, useDarkIcons, colorScheme) {
+        systemUiController.setSystemBarsColor(
+            color = colorScheme.background,
+            darkIcons = useDarkIcons
+        )
+    }
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
     )
+}
+
+fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }

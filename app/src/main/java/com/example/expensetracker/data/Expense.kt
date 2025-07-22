@@ -11,5 +11,7 @@ data class Expense(
     @ColumnInfo(name = "expense_name")
     val name: String,
     @ColumnInfo(name = "expense_amount")
-    val amount: Double
+    val amount: Double,
+    @ColumnInfo(name = "expense_date")
+    val date: Long = System.currentTimeMillis(),
 )
