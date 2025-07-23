@@ -45,13 +45,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val newExpenseName by viewModel.newExpenseName.collectAsState()
     val newExpenseAmount by viewModel.newExpenseAmount.collectAsState()
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.uiEvent.collect { message ->
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
 
     AppDrawer(drawerState= drawerState, scope = scope) {
         Scaffold(
@@ -61,7 +70,16 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
                     drawerState = drawerState,
                     scope = scope
                 )
-            }
+            },
+            snackbarHost = { SnackbarHost(snackbarHostState) {data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionColor = MaterialTheme.colorScheme.tertiary,
+                    dismissActionContentColor = MaterialTheme.colorScheme.tertiary
+                )
+            } }
         ) { paddingValues ->
             Column(
                 modifier = Modifier

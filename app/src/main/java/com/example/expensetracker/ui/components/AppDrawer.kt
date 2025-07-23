@@ -1,12 +1,12 @@
 package com.example.expensetracker.ui.components
 
 import android.content.Intent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,7 +18,6 @@ import com.example.expensetracker.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDrawer(
     drawerState: DrawerState,
@@ -30,27 +29,33 @@ fun AppDrawer(
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(0.75f)
+                modifier = Modifier.fillMaxWidth(0.75f),
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary)
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
+
                 ) {
                     Text(
-                        text = "Expense Tracker Menu",
+                        text = "Expense Tracker",
                         style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(onClick = {
                         scope.launch { drawerState.close() }
                     }) {
-                        Icon(Icons.Default.Close, contentDescription = "Close Menu")
+                        Icon(Icons.Default.Close, contentDescription = "Close Menu", tint = MaterialTheme.colorScheme.onPrimary)
                     }
                 }
+
                 HorizontalDivider()
+
+                Spacer(modifier = Modifier.height(8.dp) )
 
                 NavigationDrawerItem(
                     label = { Text("Input Expenses") },
@@ -63,6 +68,8 @@ fun AppDrawer(
                     },
                     icon = { Icon(Icons.Default.Create, contentDescription = "Input Expense") }
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 NavigationDrawerItem(
                     label = { Text("View Expenses") },

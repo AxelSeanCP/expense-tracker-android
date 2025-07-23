@@ -5,24 +5,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.Expense
 import com.example.expensetracker.data.ExpenseDao
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
+import java.util.Calendar
+import kotlinx.coroutines.flow.flatMapLatest
 
 class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
-
-    // state for the list of expenses displayed in the UI
-    // it collects from the room flow and converts it to a state flow
-    val expenses: StateFlow<List<Expense>> = expenseDao.getAllExpenses()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
 
     // State for the input fields for adding a new expense
     private val _newExpenseName = MutableStateFlow("")
@@ -30,6 +28,34 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
 
     private val _newExpenseAmount = MutableStateFlow("")
     val newExpenseAmount: StateFlow<String> = _newExpenseAmount.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<String>()
+    val uiEvent: SharedFlow<String> = _uiEvent.asSharedFlow()
+
+    // State for selected month and year for filtering
+    private val _selectedMonth = MutableStateFlow(Calendar.getInstance().get(Calendar.MONTH)) // 0-indexed (jan = 0)
+    val selectedMonth: StateFlow<Int> = _selectedMonth.asStateFlow()
+
+    private val _selectedYear = MutableStateFlow(Calendar.getInstance().get(Calendar.YEAR))
+    val selectedYear = _selectedYear.asStateFlow()
+
+    // Combine selected month/year with the DAO query to get filtered expenses
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val expenses: StateFlow<List<Expense>> = combine(
+        selectedMonth,
+        selectedYear
+    ) { month, year ->
+        // Convert 0-indexed month (from Calendar) to 1-indexed string (for strftime in SQLite)
+        val formattedMonth = (month + 1).toString().padStart(2, '0')
+        val formattedYear = year.toString()
+        expenseDao.getExpensesByMonthAndYear(formattedYear, formattedMonth)
+    }
+        .flatMapLatest { it } // Use flatMapLatest to switch to the new Flow when parameters change
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     // State for the total expense amount
     val totalExpenses: StateFlow<Double> = expenses
@@ -64,6 +90,10 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
 
                 _newExpenseName.value = ""
                 _newExpenseAmount.value = ""
+
+                _uiEvent.emit("Expense ${name} added successfully!")
+            } else {
+                _uiEvent.emit("Please enter a valid expense name and amount.")
             }
         }
     }
@@ -71,13 +101,40 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             expenseDao.deleteExpense(expense)
+            _uiEvent.emit("Expense '${expense.name}' is deleted.")
         }
     }
 
     fun clearAllExpenses() {
         viewModelScope.launch {
             expenseDao.deleteAllExpenses()
+            _uiEvent.emit("All expenses cleared.")
         }
+    }
+
+    fun selectMonth(year: Int, month: Int) {
+        _selectedYear.value = year
+        _selectedMonth.value = month
+    }
+
+    fun previousMonth() {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.YEAR, _selectedYear.value)
+            set(Calendar.MONTH, _selectedMonth.value)
+            add(Calendar.MONTH, -1)
+        }
+        _selectedYear.value = calendar.get(Calendar.YEAR)
+        _selectedMonth.value = calendar.get(Calendar.MONTH)
+    }
+
+    fun nextMonth() {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.YEAR, _selectedYear.value)
+            set(Calendar.MONTH, _selectedMonth.value)
+            add(Calendar.MONTH, 1)
+        }
+        _selectedYear.value = calendar.get(Calendar.YEAR)
+        _selectedMonth.value = calendar.get(Calendar.MONTH)
     }
 }
 
