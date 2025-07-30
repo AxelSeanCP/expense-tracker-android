@@ -39,6 +39,9 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
     private val _selectedYear = MutableStateFlow(Calendar.getInstance().get(Calendar.YEAR))
     val selectedYear = _selectedYear.asStateFlow()
 
+    private val _selectedExpenseDate = MutableStateFlow(System.currentTimeMillis())
+    val selectedExpenseDate: StateFlow<Long> = _selectedExpenseDate.asStateFlow()
+
     // Combine selected month/year with the DAO query to get filtered expenses
     @OptIn(ExperimentalCoroutinesApi::class)
     val expenses: StateFlow<List<Expense>> = combine(
@@ -83,19 +86,25 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
         viewModelScope.launch {
             val name = _newExpenseName.value.trim()
             val amount = _newExpenseAmount.value.toDoubleOrNull()
+            val date = _selectedExpenseDate.value
 
             if (name.isNotBlank() && amount != null && amount > 0) {
-                val newExpense = Expense(name = name, amount = amount)
+                val newExpense = Expense(name = name, amount = amount, date = date)
                 expenseDao.insertExpense(newExpense)
 
                 _newExpenseName.value = ""
                 _newExpenseAmount.value = ""
+                _selectedExpenseDate.value = System.currentTimeMillis()
 
-                _uiEvent.emit("Expense ${name} added successfully!")
+                _uiEvent.emit("Expense $name added successfully!")
             } else {
                 _uiEvent.emit("Please enter a valid expense name and amount.")
             }
         }
+    }
+
+    fun updateSelectedExpenseDate(timestamp: Long) {
+        _selectedExpenseDate.value = timestamp
     }
 
     fun deleteExpense(expense: Expense) {

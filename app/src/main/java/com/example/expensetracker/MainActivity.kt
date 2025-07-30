@@ -5,6 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +24,9 @@ import com.example.expensetracker.ui.ExpenseViewModel
 import com.example.expensetracker.ui.ExpenseViewModelFactory
 import com.example.expensetracker.ui.components.AppDrawer
 import com.example.expensetracker.ui.components.AppTopAppBar
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +53,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -52,6 +61,17 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
     val snackbarHostState = remember { SnackbarHostState() }
     val newExpenseName by viewModel.newExpenseName.collectAsState()
     val newExpenseAmount by viewModel.newExpenseAmount.collectAsState()
+    val selectedExpenseDate by viewModel.selectedExpenseDate.collectAsState()
+    val showDatePickerDialog = remember { mutableStateOf(false) }
+
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedExpenseDate
+    )
+
+    fun formatLongToDateString(timestamp: Long): String {
+        val formatter = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        return formatter.format(Date(timestamp))
+    }
 
     LaunchedEffect(key1 = Unit) {
         viewModel.uiEvent.collect { message ->
@@ -89,6 +109,27 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                val interactionSource = remember { MutableInteractionSource() }
+                LaunchedEffect(interactionSource) {
+                    interactionSource.interactions.collect { interaction ->
+                        if (interaction is PressInteraction.Release) {
+                            showDatePickerDialog.value = true
+                        }
+                    }
+                }
+                // Date picker input field
+                OutlinedTextField(
+                    value = formatLongToDateString(selectedExpenseDate),
+                    onValueChange = {},
+                    label = { Text("Expense Date")},
+                    readOnly = true,
+                    leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select Date") },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    interactionSource = interactionSource
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
                 // Input field for new Expense
                 OutlinedTextField(
                     value = newExpenseName,
@@ -97,6 +138,7 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = newExpenseAmount,
                     onValueChange = { viewModel.onNewExpenseAmountChange(it) },
@@ -114,6 +156,32 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
                     Text("Add Expense")
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Date Picker dialog
+            if (showDatePickerDialog.value) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePickerDialog.value = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { timestamp ->
+                                    viewModel.updateSelectedExpenseDate(timestamp)
+                                }
+                                showDatePickerDialog.value = false
+                            }
+                        ) {
+                            Text("Ok")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePickerDialog.value = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
             }
         }
     }
