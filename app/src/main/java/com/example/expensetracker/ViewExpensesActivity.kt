@@ -64,6 +64,9 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel) {
     val selectedMonth by viewModel.selectedMonth.collectAsState()
     val selectedYear by viewModel.selectedYear.collectAsState()
 
+    val showConfirmDeleteDialog = remember { mutableStateOf(false) }
+    val expenseToDelete = remember { mutableStateOf<Expense?>(null) }
+
     AppDrawer(drawerState = drawerState, scope = scope) {
         Scaffold(
             topBar = {
@@ -160,26 +163,68 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel) {
                         }
                     } else {
                         items(expenses) { expense ->
-                            ExpenseItem(expense = expense, onDeleteClick = {
-                                viewModel.deleteExpense(expense)
-                            })
+                            ExpenseItem(
+                                expense = expense,
+                                // Pass a lambda that updates the states to show dialog
+                                onDeleteClick = { item ->
+                                    expenseToDelete.value = item
+                                    showConfirmDeleteDialog.value = true
+                                }
+                            )
                         }
                     }
 
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        // clear all expenses button
-                        TextButton(
-                            onClick = { viewModel.clearAllExpenses() },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.End)
-                        ) {
-                            Text("Clear All Expenses")
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+//                    item {
+//                        Spacer(modifier = Modifier.height(16.dp))
+//                        // clear all expenses button
+//                        TextButton(
+//                            onClick = { viewModel.clearAllExpenses() },
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .wrapContentWidth(Alignment.End)
+//                        ) {
+//                            Text("Clear All Expenses")
+//                        }
+//                        Spacer(modifier = Modifier.height(8.dp))
+//                    }
                 }
+            }
+
+            // Delete expense dialog
+            if (showConfirmDeleteDialog.value) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showConfirmDeleteDialog.value = false
+                        expenseToDelete.value = null
+                    },
+                    title = { Text("Confirm Deletion") },
+                    text = {
+                        Text("Are you sure you want to delete '${expenseToDelete.value?.name ?: "this expense"}'?")
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                expenseToDelete.value?.let { expense ->
+                                    viewModel.deleteExpense(expense)
+                                }
+                                showConfirmDeleteDialog.value = false
+                                expenseToDelete.value = null
+                            }
+                        ) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = {
+                                showConfirmDeleteDialog.value = false
+                                expenseToDelete.value = null
+                            }
+                        ) {
+                            Text("Cancel")
+                        }
+                    }
+                )
             }
         }
     }
@@ -187,7 +232,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel) {
 
 
 @Composable
-fun ExpenseItem(expense: Expense, onDeleteClick: () -> Unit) {
+fun ExpenseItem(expense: Expense, onDeleteClick: (Expense) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(2.dp)
@@ -216,7 +261,7 @@ fun ExpenseItem(expense: Expense, onDeleteClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
-            IconButton(onClick = onDeleteClick) {
+            IconButton(onClick = { onDeleteClick(expense) }) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete Expense",
