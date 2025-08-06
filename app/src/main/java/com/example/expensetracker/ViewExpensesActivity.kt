@@ -28,6 +28,7 @@ import com.example.expensetracker.ui.components.AppTopAppBar
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.example.expensetracker.utils.formatAmount
 
 class ViewExpensesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,7 +104,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Month")
                         }
                         Text(
-                            text = "${getMonthName(selectedMonth)} ${selectedYear}",
+                            text = "${getMonthName(selectedMonth)} $selectedYear",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -137,7 +138,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel) {
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    text = "Rp. ${"%.2f".format(totalExpenses)}",
+                                    text = "Rp. ${formatAmount(totalExpenses)}",
                                     style = MaterialTheme.typography.headlineLarge,
                                     color = MaterialTheme.colorScheme.primary
                                 )
@@ -256,7 +257,7 @@ fun ExpenseItem(expense: Expense, onDeleteClick: (Expense) -> Unit) {
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "Rp. ${"%.2f".format(expense.amount)}",
+                    text = "Rp. ${formatAmount(expense.amount)}",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.secondary
                 )

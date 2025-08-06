@@ -26,4 +26,13 @@ interface ExpenseDao {
 
     @Query("DELETE FROM expenses")
     suspend fun deleteAllExpenses()
+
+    @Query("SELECT SUM(expense_amount) FROM expenses WHERE strftime('%Y', expense_date / 1000, 'unixepoch') = :year")
+    fun getTotalExpensesByYear(year: String): Flow<Double?>
+
+    @Query("SELECT AVG(expense_amount) FROM expenses WHERE strftime('%Y', expense_date / 1000, 'unixepoch') = :year")
+    fun getAverageExpensesByYear(year: String): Flow<Double?>
+
+    @Query("SELECT COUNT(id) FROM expenses WHERE strftime('%Y', expense_date / 1000, 'unixepoch') = :year")
+    fun getExpenseCountByYear(year: String): Flow<Int>
 }
