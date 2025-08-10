@@ -3,6 +3,7 @@ package com.example.expensetracker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.data.AppDatabase
 import com.example.expensetracker.data.Expense
+import com.example.expensetracker.data.ThemePreferenceManager
 import com.example.expensetracker.ui.ExpenseViewModel
 import com.example.expensetracker.ui.ExpenseViewModelFactory
 import com.example.expensetracker.ui.components.AppDrawer
@@ -33,8 +35,14 @@ import com.example.expensetracker.utils.formatAmount
 class ViewExpensesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val themeManager = ThemePreferenceManager(this)
+
         setContent {
-            ExpenseTrackerTheme {
+            val isDarkTheme by themeManager.isDarkTheme.collectAsState(initial = false)
+
+            ExpenseTrackerTheme(
+                darkTheme = isDarkTheme
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -48,7 +56,7 @@ class ViewExpensesActivity : ComponentActivity() {
                     val viewModel: ExpenseViewModel = viewModel(
                         factory = ExpenseViewModelFactory(expenseDao)
                     )
-                    ViewExpensesScreen(viewModel = viewModel)
+                    ViewExpensesScreen(viewModel = viewModel, isDarkTheme = isDarkTheme, themeManager = themeManager)
                 }
             }
         }
@@ -56,7 +64,7 @@ class ViewExpensesActivity : ComponentActivity() {
 }
 
 @Composable
-fun ViewExpensesScreen(viewModel: ExpenseViewModel) {
+fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeManager: ThemePreferenceManager) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -74,7 +82,9 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel) {
                 AppTopAppBar(
                     title = "View Expenses",
                     drawerState = drawerState,
-                    scope = scope
+                    scope = scope,
+                    isDarkTheme = isDarkTheme,
+                    themeManager = themeManager
                 )
             }
         ) { paddingValues ->

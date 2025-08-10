@@ -3,6 +3,7 @@ package com.example.expensetracker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +29,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.data.AppDatabase
+import com.example.expensetracker.data.ThemePreferenceManager
 import com.example.expensetracker.ui.SummaryViewModel
 import com.example.expensetracker.ui.SummaryViewModelFactory
 import com.example.expensetracker.ui.components.AppDrawer
@@ -46,8 +51,14 @@ import com.example.expensetracker.utils.formatAmount
 class SummaryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val themeManager = ThemePreferenceManager(this)
+
         setContent {
-            ExpenseTrackerTheme {
+            val isDarkTheme by themeManager.isDarkTheme.collectAsState(initial = false)
+
+            ExpenseTrackerTheme(
+                darkTheme = isDarkTheme
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -59,7 +70,7 @@ class SummaryActivity : ComponentActivity() {
                     val viewModel: SummaryViewModel = viewModel(
                         factory = SummaryViewModelFactory(expenseDao)
                     )
-                    ExpenseSummaryScreen(viewModel = viewModel)
+                    ExpenseSummaryScreen(viewModel = viewModel, isDarkTheme = isDarkTheme, themeManager = themeManager)
                 }
             }
         }
@@ -68,7 +79,7 @@ class SummaryActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseSummaryScreen(viewModel: SummaryViewModel) {
+fun ExpenseSummaryScreen(viewModel: SummaryViewModel, isDarkTheme: Boolean, themeManager: ThemePreferenceManager) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -83,7 +94,9 @@ fun ExpenseSummaryScreen(viewModel: SummaryViewModel) {
                 AppTopAppBar(
                     title = "Expense Summary",
                     drawerState = drawerState,
-                    scope = scope
+                    scope = scope,
+                    isDarkTheme = isDarkTheme,
+                    themeManager = themeManager
                 )
             }
         ) { paddingValues ->
@@ -93,7 +106,7 @@ fun ExpenseSummaryScreen(viewModel: SummaryViewModel) {
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top // Align to top
+                verticalArrangement = Arrangement.Top
             ) {
                 // Year Selector
                 Spacer(modifier = Modifier.height(8.dp))

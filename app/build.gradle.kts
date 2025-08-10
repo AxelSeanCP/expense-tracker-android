@@ -63,7 +63,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation (libs.androidx.lifecycle.viewmodel.compose)
-
     implementation(libs.accompanist.systemuicontroller)
-
+    implementation(libs.androidx.material.icons.extended)
+    implementation (libs.androidx.datastore.preferences)
 }

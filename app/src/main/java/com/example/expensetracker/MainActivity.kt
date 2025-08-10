@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
@@ -17,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.data.AppDatabase
@@ -24,6 +24,7 @@ import com.example.expensetracker.ui.ExpenseViewModel
 import com.example.expensetracker.ui.ExpenseViewModelFactory
 import com.example.expensetracker.ui.components.AppDrawer
 import com.example.expensetracker.ui.components.AppTopAppBar
+import com.example.expensetracker.data.ThemePreferenceManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,8 +32,14 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val themeManager = ThemePreferenceManager(this)
+
         setContent {
-            ExpenseTrackerTheme {
+            val isDarkTheme by themeManager.isDarkTheme.collectAsState(initial = false)
+
+            ExpenseTrackerTheme(
+                darkTheme = isDarkTheme
+            ) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -46,7 +53,7 @@ class MainActivity : ComponentActivity() {
                     val viewModel: ExpenseViewModel = viewModel(
                         factory = ExpenseViewModelFactory(expenseDao)
                     )
-                    ExpenseTrackerScreen(viewModel = viewModel)
+                    ExpenseTrackerScreen(viewModel = viewModel, isDarkTheme = isDarkTheme, themeManager = themeManager)
                 }
             }
         }
@@ -55,7 +62,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
+fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeManager: ThemePreferenceManager) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -88,7 +95,9 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel) {
                 AppTopAppBar(
                     title = "Input Expenses",
                     drawerState = drawerState,
-                    scope = scope
+                    scope = scope,
+                    isDarkTheme = isDarkTheme,
+                    themeManager = themeManager
                 )
             },
             snackbarHost = { SnackbarHost(snackbarHostState) {data ->
