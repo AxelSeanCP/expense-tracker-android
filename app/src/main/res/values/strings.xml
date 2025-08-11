@@ -2,4 +2,5 @@
     <string name="app_name">ExpenseTracker</string>
     <string name="title_activity_view_expenses">ViewExpensesActivity</string>
     <string name="title_activity_summary">SummaryActivity</string>
+    <string name="title_activity_export_import">ExportImportActivity</string>
 </resources>

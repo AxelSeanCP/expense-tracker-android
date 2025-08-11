@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.expensetracker.ExportImportActivity
 import com.example.expensetracker.ViewExpensesActivity
 import com.example.expensetracker.MainActivity
 import com.example.expensetracker.SummaryActivity
@@ -94,6 +95,20 @@ fun AppDrawer(
                         scope.launch { drawerState.close() }
                         if (context !is SummaryActivity) {
                             context.startActivity(Intent(context, SummaryActivity::class.java))
+                        }
+                    },
+                    icon = { Icon(Icons.Default.Info, contentDescription = "Summary")}
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                NavigationDrawerItem(
+                    label = { Text("Export & Import") },
+                    selected = context is ExportImportActivity,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        if (context !is ExportImportActivity) {
+                            context.startActivity(Intent(context, ExportImportActivity::class.java))
                         }
                     },
                     icon = { Icon(Icons.Default.Info, contentDescription = "Summary")}
