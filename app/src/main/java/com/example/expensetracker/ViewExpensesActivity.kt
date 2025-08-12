@@ -48,11 +48,10 @@ class ViewExpensesActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val context = LocalContext.current
-                    // Get database and DAO instances
+
                     val database = AppDatabase.getDatabase(context)
                     val expenseDao = database.expenseDao()
 
-                    // Create view model using the factory
                     val viewModel: ExpenseViewModel = viewModel(
                         factory = ExpenseViewModelFactory(expenseDao)
                     )
