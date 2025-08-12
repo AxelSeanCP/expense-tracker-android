@@ -1,6 +1,54 @@
 <resources>
-    <string name="app_name">ExpenseTracker</string>
-    <string name="title_activity_view_expenses">ViewExpensesActivity</string>
-    <string name="title_activity_summary">SummaryActivity</string>
-    <string name="title_activity_export_import">ExportImportActivity</string>
+    <string name="title_activity_input_expenses">Input Pengeluaran</string>
+    <string name="title_activity_export_import">Cadangkan &amp; Pulihkan</string>
+    <string name="title_activity_summary">Ringkasan Pengeluaran</string>
+    <string name="title_activity_view_expenses">Lihat Pengeluaran</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Batal</string>
+    <!-- main activity -->
+    <string name="app_name">Expense Tracker</string>
+    <string name="input_expenses">Input Pengeluaran</string>
+    <string name="expense_date">Tanggal Pengeluaran</string>
+    <string name="expense_name">Nama Pengeluaran</string>
+    <string name="amount_hint">Jumlah (e.g. 25000)</string>
+    <string name="add_expense">Tambah Pengeluaran</string>
+    <string name="select_date">Pilih Tanggal</string>
+
+    <!-- view expenses activity -->
+    <string name="view_expenses">Lihat Pengeluaran</string>
+    <string name="previous_month">Bulan Sebelumnya</string>
+    <string name="next_month">Bulan Berikutnya</string>
+    <string name="total_expenses">Total Pengeluaran:</string>
+    <string name="your_expenses">Pengeluaran Anda:</string>
+    <string name="no_expenses_added">Belum ada pengeluaran ditambahkan.</string>
+    <string name="confirm_deletion">Konfirmasi Penghapusan</string>
+    <string name="confirm_delete_message">Anda yakin ingin menghapus \'%1$s\'?</string>
+    <string name="delete">Hapus</string>
+    <string name="delete_expense">Hapus Pengeluaran</string>
+    <string name="delete_all_expenses">Hapus Semua Pengeluaran</string>
+    <string name="confirm_clear_all">Konfirmasi Hapus Semua</string>
+    <string name="confirm_clear_all_message">Anda yakin ingin menghapus semua pengeluaran?</string>
+
+    <!-- summary activity -->
+    <string name="expense_summary">Ringkasan Pengeluaran</string>
+    <string name="previous_year">Tahun Sebelumnya</string>
+    <string name="next_year">Tahun Berikutnya</string>
+    <string name="total_expenses_summary">Total Pengeluaran</string>
+    <string name="average_expenses_summary">Rata-rata Pengeluaran</string>
+    <string name="number_of_expenses_summary">Jumlah Pengeluaran</string>
+
+    <!-- export import activity -->
+    <string name="export_database">Ekspor Database</string>
+    <string name="import_database">Impor Database</string>
+    <string name="backup_restore">Cadangkan &amp; Pulihkan</string>
+    <string name="database_exported">Database berhasil diekspor! Periksa penyimpanan perangkat Anda.</string>
+    <string name="database_imported">Database berhasil diimpor! Silakan muat ulang aplikasi Anda</string>
+    <string name="export_failed">Gagal mengekspor database.</string>
+    <string name="import_failed">Gagal mengimpor database.</string>
+
+    <string name="expense_added_message">Pengeluaran \'%1$s\' berhasil ditambahkan!</string>
+    <string name="invalid_input_message">Silakan masukkan nama dan jumlah pengeluaran yang valid.</string>
+    <string name="expense_deleted_message">Pengeluaran \'%1$s\' berhasil dihapus.</string>
+    <string name="expenses_cleared_message">Semua pengeluaran telah dihapus.</string>
 </resources>

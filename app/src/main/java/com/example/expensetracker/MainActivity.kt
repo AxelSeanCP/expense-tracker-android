@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.data.AppDatabase
@@ -25,6 +24,7 @@ import com.example.expensetracker.ui.ExpenseViewModelFactory
 import com.example.expensetracker.ui.components.AppDrawer
 import com.example.expensetracker.ui.components.AppTopAppBar
 import com.example.expensetracker.data.ThemePreferenceManager
+import androidx.compose.ui.res.stringResource
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,6 +65,7 @@ class MainActivity : ComponentActivity() {
 fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeManager: ThemePreferenceManager) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val newExpenseName by viewModel.newExpenseName.collectAsState()
     val newExpenseAmount by viewModel.newExpenseAmount.collectAsState()
@@ -81,7 +82,8 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, them
     }
 
     LaunchedEffect(key1 = Unit) {
-        viewModel.uiEvent.collect { message ->
+        viewModel.uiEvent.collect { event ->
+            val message = context.getString(event.messageResId, *event.formatArgs.toTypedArray())
             snackbarHostState.showSnackbar(
                 message = message,
                 duration = SnackbarDuration.Short
@@ -93,7 +95,7 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, them
         Scaffold(
             topBar = {
                 AppTopAppBar(
-                    title = "Input Expenses",
+                    title = stringResource(R.string.input_expenses),
                     drawerState = drawerState,
                     scope = scope,
                     isDarkTheme = isDarkTheme,
@@ -130,9 +132,9 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, them
                 OutlinedTextField(
                     value = formatLongToDateString(selectedExpenseDate),
                     onValueChange = {},
-                    label = { Text("Expense Date")},
+                    label = { Text(stringResource(R.string.expense_date)) },
                     readOnly = true,
-                    leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = "Select Date") },
+                    leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.select_date)) },
                     modifier = Modifier
                         .fillMaxWidth(),
                     interactionSource = interactionSource
@@ -143,7 +145,7 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, them
                 OutlinedTextField(
                     value = newExpenseName,
                     onValueChange = { viewModel.onNewExpenseNameChange(it) },
-                    label = { Text("Expense Name") },
+                    label = { Text(stringResource(R.string.expense_name)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -151,7 +153,7 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, them
                 OutlinedTextField(
                     value = newExpenseAmount,
                     onValueChange = { viewModel.onNewExpenseAmountChange(it) },
-                    label = { Text("Amount (e.g. 25000)") },
+                    label = { Text(stringResource(R.string.amount_hint)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -162,7 +164,7 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, them
                     onClick = { viewModel.addExpense() },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Add Expense")
+                    Text(stringResource(R.string.add_expense))
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -180,12 +182,12 @@ fun ExpenseTrackerScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, them
                                 showDatePickerDialog.value = false
                             }
                         ) {
-                            Text("Ok")
+                            Text(stringResource(R.string.ok))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDatePickerDialog.value = false }) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 ) {

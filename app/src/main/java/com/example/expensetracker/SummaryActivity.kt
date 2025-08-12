@@ -3,7 +3,7 @@ package com.example.expensetracker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,10 +29,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -92,7 +89,7 @@ fun ExpenseSummaryScreen(viewModel: SummaryViewModel, isDarkTheme: Boolean, them
         Scaffold(
             topBar = {
                 AppTopAppBar(
-                    title = "Expense Summary",
+                    title = stringResource(R.string.expense_summary),
                     drawerState = drawerState,
                     scope = scope,
                     isDarkTheme = isDarkTheme,
@@ -122,7 +119,7 @@ fun ExpenseSummaryScreen(viewModel: SummaryViewModel, isDarkTheme: Boolean, them
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { viewModel.previousYear() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Year")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.previous_year))
                         }
                         Text(
                             text = selectedYear.toString(),
@@ -130,7 +127,7 @@ fun ExpenseSummaryScreen(viewModel: SummaryViewModel, isDarkTheme: Boolean, them
                             fontWeight = FontWeight.Bold
                         )
                         IconButton(onClick = { viewModel.nextYear() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Year")
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.next_year))
                         }
                     }
                 }
@@ -138,21 +135,21 @@ fun ExpenseSummaryScreen(viewModel: SummaryViewModel, isDarkTheme: Boolean, them
                 // Summary Data Cards
                 Spacer(modifier = Modifier.height(16.dp))
                 SummaryCard(
-                    title = "Total Expenses",
+                    title = stringResource(R.string.total_expenses_summary),
                     value = totalExpenses,
                     prefix = "Rp. "
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
                 SummaryCard(
-                    title = "Average Expenses",
+                    title = stringResource(R.string.average_expenses_summary),
                     value = averageExpenses,
                     prefix = "Rp. "
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
                 SummaryCard(
-                    title = "Number of Expenses",
+                    title = stringResource(R.string.number_of_expenses_summary),
                     value = expenseCount.toDouble(),
                     prefix = ""
                 )

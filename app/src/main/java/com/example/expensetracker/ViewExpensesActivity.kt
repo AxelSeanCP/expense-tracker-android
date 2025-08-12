@@ -3,7 +3,6 @@ package com.example.expensetracker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.example.expensetracker.data.AppDatabase
@@ -63,6 +63,7 @@ class ViewExpensesActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeManager: ThemePreferenceManager) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -75,12 +76,13 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
 
     val showConfirmDeleteDialog = remember { mutableStateOf(false) }
     val expenseToDelete = remember { mutableStateOf<Expense?>(null) }
+    val showClearAllDialog = remember { mutableStateOf(false) }
 
     AppDrawer(drawerState = drawerState, scope = scope) {
         Scaffold(
             topBar = {
                 AppTopAppBar(
-                    title = "View Expenses",
+                    title = stringResource(R.string.view_expenses),
                     drawerState = drawerState,
                     scope = scope,
                     isDarkTheme = isDarkTheme,
@@ -120,7 +122,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                                 IconButton(
                                     onClick = { viewModel.previousMonth() }
                                 ) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous Month")
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.previous_month))
                                 }
                                 Text(
                                     text = "${getMonthName(selectedMonth)} $selectedYear",
@@ -130,7 +132,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                                 IconButton(
                                     onClick = { viewModel.nextMonth() }
                                 ) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Month")
+                                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.next_month))
                                 }
                             }
                         }
@@ -145,7 +147,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "Total Expenses:",
+                                    text = stringResource(R.string.total_expenses),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -162,7 +164,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Your Expenses:",
+                            text = stringResource(R.string.your_expenses),
                             style = MaterialTheme.typography.headlineSmall,
                             modifier= Modifier.fillMaxWidth()
                         )
@@ -172,7 +174,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                     // list of expenses
                     if (expenses.isEmpty()) {
                         item {
-                            Text("No expenses added yet.", modifier = Modifier.padding(16.dp))
+                            Text(stringResource(R.string.no_expenses_added), modifier = Modifier.padding(16.dp))
                         }
                     } else {
                         items(expenses) { expense ->
@@ -187,19 +189,19 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                         }
                     }
 
-//                    item {
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                        // clear all expenses button
-//                        TextButton(
-//                            onClick = { viewModel.clearAllExpenses() },
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .wrapContentWidth(Alignment.End)
-//                        ) {
-//                            Text("Clear All Expenses")
-//                        }
-//                        Spacer(modifier = Modifier.height(8.dp))
-//                    }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // clear all expenses button
+                        TextButton(
+                            onClick = { showClearAllDialog.value = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.End)
+                        ) {
+                            Text(stringResource(R.string.delete_all_expenses))
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
 
@@ -210,9 +212,9 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                         showConfirmDeleteDialog.value = false
                         expenseToDelete.value = null
                     },
-                    title = { Text("Confirm Deletion") },
+                    title = { Text(stringResource(R.string.confirm_deletion)) },
                     text = {
-                        Text("Are you sure you want to delete '${expenseToDelete.value?.name ?: "this expense"}'?")
+                        Text(stringResource(R.string.confirm_delete_message, expenseToDelete.value?.name ?: "pengeluaran ini"))
                     },
                     confirmButton = {
                         TextButton(
@@ -224,7 +226,7 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                                 expenseToDelete.value = null
                             }
                         ) {
-                            Text("Delete")
+                            Text(stringResource(R.string.delete))
                         }
                     },
                     dismissButton = {
@@ -234,7 +236,32 @@ fun ViewExpensesScreen(viewModel: ExpenseViewModel, isDarkTheme: Boolean, themeM
                                 expenseToDelete.value = null
                             }
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                )
+            }
+
+            if (showClearAllDialog.value) {
+                AlertDialog(
+                    onDismissRequest = { showClearAllDialog.value = false },
+                    title = { Text(stringResource(R.string.confirm_clear_all)) },
+                    text = { Text(stringResource(R.string.confirm_clear_all_message)) },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.clearAllExpenses()
+                                showClearAllDialog.value = false
+                            }
+                        ) {
+                            Text(stringResource(R.string.delete_all_expenses))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showClearAllDialog.value = false }
+                        ) {
+                            Text(stringResource(R.string.cancel))
                         }
                     }
                 )

@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.data.Expense
 import com.example.expensetracker.data.ExpenseDao
-import com.example.expensetracker.data.DatabaseFileManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +19,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.combine
 import java.util.Calendar
 import kotlinx.coroutines.flow.flatMapLatest
+import com.example.expensetracker.utils.MessageEvent
+import com.example.expensetracker.R
 
 class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
 
@@ -30,8 +31,8 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
     private val _newExpenseAmount = MutableStateFlow("")
     val newExpenseAmount: StateFlow<String> = _newExpenseAmount.asStateFlow()
 
-    private val _uiEvent = MutableSharedFlow<String>()
-    val uiEvent: SharedFlow<String> = _uiEvent.asSharedFlow()
+    private val _uiEvent = MutableSharedFlow<MessageEvent>()
+    val uiEvent: SharedFlow<MessageEvent> = _uiEvent.asSharedFlow()
 
     // State for selected month and year for filtering
     private val _selectedMonth = MutableStateFlow(Calendar.getInstance().get(Calendar.MONTH)) // 0-indexed (jan = 0)
@@ -97,9 +98,9 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
                 _newExpenseAmount.value = ""
                 _selectedExpenseDate.value = System.currentTimeMillis()
 
-                _uiEvent.emit("Expense $name added successfully!")
+                _uiEvent.emit(MessageEvent(R.string.expense_added_message, listOf(name)))
             } else {
-                _uiEvent.emit("Please enter a valid expense name and amount.")
+                _uiEvent.emit(MessageEvent(R.string.invalid_input_message))
             }
         }
     }
@@ -111,14 +112,14 @@ class ExpenseViewModel(private val expenseDao: ExpenseDao) : ViewModel() {
     fun deleteExpense(expense: Expense) {
         viewModelScope.launch {
             expenseDao.deleteExpense(expense)
-            _uiEvent.emit("Expense '${expense.name}' is deleted.")
+            _uiEvent.emit(MessageEvent(R.string.expense_deleted_message, listOf(expense.name)))
         }
     }
 
     fun clearAllExpenses() {
         viewModelScope.launch {
             expenseDao.deleteAllExpenses()
-            _uiEvent.emit("All expenses cleared.")
+            _uiEvent.emit(MessageEvent(R.string.expenses_cleared_message))
         }
     }
 
